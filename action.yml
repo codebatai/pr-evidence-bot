@@ -1,0 +1,19 @@
+name: "PR Evidence Bot (Skeleton)"
+description: "Public-safe skeleton that echoes a demo verification report."
+inputs:
+  receipts:
+    description: "Glob for receipt files"
+    required: false
+    default: "./evidence/*.json"
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        echo "## ✅ Skeleton Verification" > report.md
+        echo "" >> report.md
+        echo "This is a placeholder action. No cryptography is executed." >> report.md
+        echo "Receipts glob: ${{ inputs.receipts }}" >> report.md
+        echo "" >> report.md
+        echo "_Endpoints and keys must remain placeholders (example.invalid, aws-kms://example-...)._" >> report.md
+        echo "::notice file=report.md::Skeleton report generated."
