@@ -1,0 +1,23 @@
+name: CI - Sanitize & Parse
+on: [push, pull_request]
+jobs:
+  sanitize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          fail: true
+      - name: Enforce placeholders only
+        run: |
+          set -e
+          # No real-looking URLs (must use example.invalid)
+          if grep -R -nE 'https?://(?![^ ]*example\.invalid)' --include='*.md' --include='*.json' .; then
+            echo "::error::Replace all URLs with example.invalid placeholders"; exit 1; fi
+          # No obvious keys/certs tokens
+          if grep -R -nE '(AKIA|ASIA|AIzaSy|ghp_|xoxb-|-----BEGIN (PRIVATE|RSA) KEY-----)' .; then
+            echo "::error::Looks like a real key/cert material"; exit 1; fi
+      - name: JSON parses
+        run: |
+          find . -name "*.json" -print0 | xargs -0 -I{} sh -c 'jq . {} >/dev/null'
